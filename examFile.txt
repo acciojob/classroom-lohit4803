@@ -1,0 +1,205 @@
+package com.amiya.springbootdemoproject.entity;
+ 
+// Importing required classes
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+ 
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+ 
+// Class
+public class Department {
+ 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long departmentId;
+    private String departmentName;
+    private String departmentAddress;
+    private String departmentCode;
+}
+
+package com.amiya.springbootdemoproject.repository;
+ 
+import com.amiya.springbootdemoproject.entity.Department;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
+ 
+@Repository
+public interface DepartmentRepository extends CrudRepository<Department, Long> {
+     
+}
+
+// Java Program to Illustrate DepartmentService.java File
+ 
+// Importing packages
+package com.amiya.springbootdemoproject.service;
+import com.amiya.springbootdemoproject.entity.Department;
+// Importing required classes
+import java.util.List;
+ 
+// Class
+public interface DepartmentService {
+ 
+    // Save operation
+    Department saveDepartment(Department department);
+ 
+    // Read operation
+    List<Department> fetchDepartmentList();
+ 
+    // Update operation
+    Department updateDepartment(Department department,
+                                Long departmentId);
+ 
+    // Delete operation
+    void deleteDepartmentById(Long departmentId);
+}
+
+// Java Program to Illustrate DepartmentServiceImpl.java
+// File
+ 
+// Importing required packages
+package com.amiya.springbootdemoproject.service;
+ 
+import com.amiya.springbootdemoproject.entity.Department;
+import com.amiya.springbootdemoproject.repository.DepartmentRepository;
+// Importing required classes
+import java.util.List;
+import java.util.Objects;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+ 
+// Annotation
+@Service
+// Class implementing DepartmentService class
+public class DepartmentServiceImpl
+    implements DepartmentService {
+ 
+    @Autowired
+    private DepartmentRepository departmentRepository;
+ 
+    // Save operation
+    @Override
+    public Department saveDepartment(Department department)
+    {
+        return departmentRepository.save(department);
+    }
+ 
+    // Read operation
+    @Override public List<Department> fetchDepartmentList()
+    {
+        return (List<Department>)
+            departmentRepository.findAll();
+    }
+ 
+    // Update operation
+    @Override
+    public Department
+    updateDepartment(Department department,
+                     Long departmentId)
+    {
+ 
+        Department depDB
+            = departmentRepository.findById(departmentId)
+                  .get();
+ 
+        if (Objects.nonNull(department.getDepartmentName())
+            && !"".equalsIgnoreCase(
+                department.getDepartmentName())) {
+            depDB.setDepartmentName(
+                department.getDepartmentName());
+        }
+ 
+        if (Objects.nonNull(
+                department.getDepartmentAddress())
+            && !"".equalsIgnoreCase(
+                department.getDepartmentAddress())) {
+            depDB.setDepartmentAddress(
+                department.getDepartmentAddress());
+        }
+ 
+        if (Objects.nonNull(department.getDepartmentCode())
+            && !"".equalsIgnoreCase(
+                department.getDepartmentCode())) {
+            depDB.setDepartmentCode(
+                department.getDepartmentCode());
+        }
+ 
+        return departmentRepository.save(depDB);
+    }
+ 
+    // Delete operation
+    @Override
+    public void deleteDepartmentById(Long departmentId)
+    {
+        departmentRepository.deleteById(departmentId);
+    }
+}
+
+// Java Program to Illustrate DepartmentController.java File
+ 
+// Importing packages modules
+package com.amiya.springbootdemoproject.controller;
+ 
+import com.amiya.springbootdemoproject.entity.Department;
+import com.amiya.springbootdemoproject.service.DepartmentService;
+import java.util.List;
+// Importing required classes
+import javax.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+ 
+// Annotation
+@RestController
+// Class
+public class DepartmentController {
+ 
+    @Autowired private DepartmentService departmentService;
+ 
+    // Save operation
+    @PostMapping("/departments")
+ 
+    public Department saveDepartment(
+        @Valid @RequestBody Department department)
+    {
+        return departmentService.saveDepartment(department);
+    }
+ 
+    // Read operation
+    @GetMapping("/departments")
+ 
+    public List<Department> fetchDepartmentList()
+    {
+        return departmentService.fetchDepartmentList();
+    }
+ 
+    // Update operation
+    @PutMapping("/departments/{id}")
+ 
+    public Department
+    updateDepartment(@RequestBody Department department,
+                     @PathVariable("id") Long departmentId)
+    {
+        return departmentService.updateDepartment(
+            department, departmentId);
+    }
+ 
+    // Delete operation
+    @DeleteMapping("/departments/{id}")
+ 
+    public String deleteDepartmentById(@PathVariable("id")
+                                       Long departmentId)
+    {
+        departmentService.deleteDepartmentById(
+            departmentId);
+        return "Deleted Successfully";
+    }
+}
